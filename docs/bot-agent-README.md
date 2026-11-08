@@ -1,4 +1,4 @@
-# Prediction Market Bot Agent - Phase 2
+# Whalecheck Agent
 
 LLM-powered agent middleware for analyzing whale trades and generating copy-trading signals with sentiment analysis.
 
