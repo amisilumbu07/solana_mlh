@@ -1,0 +1,116 @@
+# Dependencies
+node_modules/
+yarn.lock
+pnpm-lock.yaml
+
+# Environment & Secrets (NEVER commit)
+.env
+.env.local
+.env.*.local
+.env.*.prod
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+out/
+.next/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+*.iml
+*.iws
+*.ipr
+
+# Testing
+coverage/
+.nyc_output/
+.mocha_output
+.jest/
+
+# Runtime data
+transaction_history.json
+settlement_history.json
+session_tokens.json
+media/
+performance/
+tmp/
+/tmp
+
+# Cache
+.cache/
+.eslintcache
+.next/cache/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Private keys & sensitive data
+*.key
+*.pem
+private/
+secrets/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Others
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.env.production.local
+
+# Docker
+docker-compose.override.yml
+
+# Parcel related
+.cache
+.parcel-cache
+dist
+
+# Rollup cache
+.rollup.cache
+
+# Generated files
+CHANGELOG.md.bak
+
+# Miscellaneous
+venv/
+.venv/
+env/
+ENV/
+
+# Keep these patterns
+!.gitkeep
+!.env.example
