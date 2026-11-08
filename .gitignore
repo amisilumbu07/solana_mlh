@@ -9,6 +9,12 @@ pnpm-lock.yaml
 .env.*.local
 .env.*.prod
 
+# Solana program builds and local validator data
+target/
+.anchor/
+test-ledger/
+*-keypair.json
+
 # Build outputs
 dist/
 build/

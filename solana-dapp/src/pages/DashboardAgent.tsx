@@ -134,7 +134,7 @@ const DashboardAgent: React.FC = () => {
           ) : (
             <div className="feed">
               {visible.map((signal) => (
-                <SignalCard key={`${signal.timestamp}-${signal.market}-${signal.reasoning}`} signal={signal} config={config} />
+                <SignalCard key={`${signal.timestamp}-${signal.market}-${signal.reasoning}`} signal={signal} config={config} cluster={agentMode?.solana?.cluster} />
               ))}
             </div>
           )}

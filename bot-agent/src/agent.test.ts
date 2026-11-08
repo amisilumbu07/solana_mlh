@@ -5,7 +5,7 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { SessionTokens } from './auth.js'
-import { ExecutionService } from './services/executionService.js'
+import { ExecutionService, PolicyRejection } from './services/executionService.js'
 import type { PlaceOrder } from './services/executionService.js'
 import { FirecrawlService } from './services/firecrawlService.js'
 import type { WebContext, WebSource } from './services/firecrawlService.js'
@@ -121,6 +121,37 @@ describe('ExecutionService', () => {
     })
     expect((await service.execute(request('a'))).status).toBe('failed')
     expect((await service.execute(request('a'))).status).toBe('duplicate')
+  })
+  it('sends nothing when Solana refuses or is unreachable', async () => {
+    const config = { live: true, copyRatio: 0.01, minOrderUsdc: 1, maxOrderUsdc: 5, maxDailyUsdc: 8, stateFile: join(mkdtempSync(join(tmpdir(), 'agent-')), 'state.json') }
+    const place = vi.fn(ok)
+    const refused = new ExecutionService(config, place, async () => {
+      throw new PolicyRejection('Solana program refused: Order exceeds the daily limit', false)
+    })
+    expect((await refused.execute(request('a'))).status).toBe('skipped')
+    const offline = new ExecutionService(config, place, async () => {
+      throw new Error('Could not reach Solana for approval')
+    })
+    expect((await offline.execute(request('b'))).status).toBe('skipped')
+    expect(place).not.toHaveBeenCalled()
+  })
+  it('treats an on-chain repeat as a duplicate and approves in cents', async () => {
+    const authorize = vi.fn(async () => ({ signature: 'sig1' }))
+    const dry = new ExecutionService(
+      { live: false, copyRatio: 0.01, minOrderUsdc: 1, maxOrderUsdc: 5, maxDailyUsdc: 8, stateFile: join(mkdtempSync(join(tmpdir(), 'agent-')), 'state.json') },
+      ok,
+      authorize,
+    )
+    expect(await dry.execute(request('a'))).toMatchObject({ status: 'dry_run', solanaTx: 'sig1' })
+    expect(authorize).toHaveBeenCalledWith('a', 500)
+    const repeat = new ExecutionService(
+      { live: false, copyRatio: 0.01, minOrderUsdc: 1, maxOrderUsdc: 5, maxDailyUsdc: 8, stateFile: join(mkdtempSync(join(tmpdir(), 'agent-')), 'state.json') },
+      ok,
+      async () => {
+        throw new PolicyRejection('already approved', true)
+      },
+    )
+    expect((await repeat.execute(request('a'))).status).toBe('duplicate')
   })
   it('skips copies below the minimum', async () => {
     expect((await setup(true, ok).execute(request('a', 10))).status).toBe('skipped')

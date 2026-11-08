@@ -12,6 +12,11 @@ function list(name: string, fallback: string[] = []): string[] {
   return raw.split(',').map((item) => item.trim()).filter(Boolean)
 }
 
+/** EVM addresses are case-insensitive. Solana addresses are not. */
+export function normalizeWallet(address: string): string {
+  return /^0x/i.test(address) ? address.toLowerCase() : address
+}
+
 export function loadConfig() {
   return {
     port: num('PORT', 3001),
@@ -48,9 +53,16 @@ export function loadConfig() {
     x402: {
       payTo: process.env.X402_PAY_TO ?? '',
       price: process.env.X402_SESSION_PRICE || '$0.05',
-      network: process.env.X402_NETWORK || 'eip155:84532',
+      network: process.env.X402_NETWORK || 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
       facilitatorUrl: process.env.X402_FACILITATOR_URL || 'https://x402.org/facilitator',
-      executeAllowlist: list('X402_EXECUTE_ALLOWLIST').map((address) => address.toLowerCase()),
+      executeAllowlist: list('X402_EXECUTE_ALLOWLIST').map(normalizeWallet),
+    },
+
+    solana: {
+      programId: process.env.SOLANA_PROGRAM_ID ?? '',
+      cluster: process.env.SOLANA_CLUSTER || 'devnet',
+      rpcUrl: process.env.SOLANA_RPC_URL ?? '',
+      keypairPath: process.env.SOLANA_KEYPAIR_PATH || '~/.config/solana/id.json',
     },
 
     session: {

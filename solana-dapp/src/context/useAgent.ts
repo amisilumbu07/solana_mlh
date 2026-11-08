@@ -48,7 +48,7 @@ export function useAgent() {
           setConfig(snapshot.riskConfig)
         }
         setWallets(snapshot.trackedWallets)
-        setAgentMode({ executionMode: snapshot.executionMode, webContextEnabled: snapshot.webContextEnabled, limits: snapshot.limits })
+        setAgentMode({ executionMode: snapshot.executionMode, webContextEnabled: snapshot.webContextEnabled, limits: snapshot.limits, solana: snapshot.solana })
         setSignals((prev) => mergeSignals(prev, snapshot.history))
       } catch (error) {
         console.error('Failed to load agent state:', error)

@@ -112,7 +112,9 @@ export class CopyPipeline {
       return { httpStatus: 409, signal: record.signal, error: 'Validation failed' }
     }
 
-    record.signal.execution = await this.place(record.trade)
+    const result = await this.place(record.trade)
+    // A repeat must not erase the record of the approval that already happened.
+    if (result.status !== 'duplicate' || !record.signal.execution?.solanaTx) record.signal.execution = result
     this.broadcast(record.signal)
     return { httpStatus: 200, signal: record.signal }
   }

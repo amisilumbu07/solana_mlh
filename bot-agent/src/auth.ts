@@ -3,6 +3,7 @@ import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import { decodePaymentSignatureHeader } from '@x402/core/http'
 import { HTTPFacilitatorClient } from '@x402/core/server'
 import { ExactEvmScheme } from '@x402/evm/exact/server'
+import { ExactSvmScheme } from '@x402/svm/exact/server'
 import { paymentMiddleware, x402ResourceServer } from '@x402/express'
 import type { AppConfig } from './config.js'
 
@@ -107,7 +108,7 @@ export function createX402Gate(config: AppConfig['x402']): X402Gate | null {
   const verifiedPayers = new Map<string, string>()
 
   const server = new x402ResourceServer(new HTTPFacilitatorClient({ url: config.facilitatorUrl }))
-    .register(network, new ExactEvmScheme())
+    .register(network, config.network.startsWith('solana:') ? new ExactSvmScheme() : new ExactEvmScheme())
     .onAfterVerify(async ({ paymentPayload, result }) => {
       if (result.isValid && result.payer) {
         verifiedPayers.set(fingerprint(paymentPayload.payload), result.payer)

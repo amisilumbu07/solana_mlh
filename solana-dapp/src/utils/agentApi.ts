@@ -19,6 +19,7 @@ export interface TradeSignal {
     status: 'dry_run' | 'placed' | 'failed' | 'duplicate' | 'skipped' | 'not_attempted'
     detail: string
     amountUsdc?: number
+    solanaTx?: string
   }
   timestamp: string
   market?: string
@@ -41,6 +42,7 @@ export interface AgentStatus {
   executionMode: 'live' | 'dry_run'
   webContextEnabled: boolean
   limits?: { maxOrderUsdc: number; maxDailyUsdc: number; spentTodayUsdc: number }
+  solana?: { programId: string; policy: string; cluster: string } | null
 }
 
 const AGENT_URL =(import.meta.env.VITE_AGENT_URL ?? 'http://localhost:3001').replace(/\/$/, '')

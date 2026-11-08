@@ -95,7 +95,7 @@ const CHAPTERS: { title: string; text: string; panel: React.ReactNode }[] = [
   },
   {
     title: 'A small copy, inside your limits',
-    text: 'The copy is a small slice of the original trade, never more than your limits allow. In dry run you see exactly what would have happened, and nothing is sent.',
+    text: 'The copy is a small slice of the original trade, never more than your limits allow. A Solana program enforces those limits and approves each trade only once. In dry run you see exactly what would have happened, and no order is sent.',
     panel: (
       <Rows
         rows={[

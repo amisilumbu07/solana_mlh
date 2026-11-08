@@ -1,6 +1,6 @@
 import React from 'react'
 import type { RiskConfig, TradeSignal } from '../utils/agentApi'
-import { formatDateTime, formatPercent, formatUsd } from '../utils/format'
+import { explorerUrl, formatDateTime, formatPercent, formatUsd } from '../utils/format'
 
 interface MeterProps {
   label: string
@@ -49,7 +49,7 @@ function executionText(execution: NonNullable<TradeSignal['execution']>): string
   }
 }
 
-const Validation: React.FC<{ signal: TradeSignal }> = ({ signal }) => {
+const Validation: React.FC<{ signal: TradeSignal; cluster?: string }> = ({ signal, cluster }) => {
   const { validation, execution } = signal
   if (!validation) return null
   const failed = validation.checks.find((check) => !check.passed)
@@ -64,11 +64,16 @@ const Validation: React.FC<{ signal: TradeSignal }> = ({ signal }) => {
           {executionText(execution)}
         </span>
       )}
+      {execution?.solanaTx && (
+        <a className="solana-link" href={explorerUrl('tx', execution.solanaTx, cluster)} target="_blank" rel="noopener noreferrer">
+          Approved on Solana
+        </a>
+      )}
     </div>
   )
 }
 
-const SignalCard: React.FC<{ signal: TradeSignal; config: RiskConfig }> = ({ signal, config }) => {
+const SignalCard: React.FC<{ signal: TradeSignal; config: RiskConfig; cluster?: string }> = ({ signal, config, cluster }) => {
   const sourceLinks = (signal.sources ?? []).filter((s) => s.kind === 'market' && s.stance !== 'neutral' && /^https?:\/\//i.test(s.url))
 
   return (
@@ -93,7 +98,7 @@ const SignalCard: React.FC<{ signal: TradeSignal; config: RiskConfig }> = ({ sig
 
       <p className="signal__why">{signal.reasoning}</p>
 
-      <Validation signal={signal} />
+      <Validation signal={signal} cluster={cluster} />
 
       {sourceLinks.length > 0 ? (
         <div className="signal__foot">

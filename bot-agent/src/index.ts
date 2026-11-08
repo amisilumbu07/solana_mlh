@@ -5,7 +5,7 @@ import { createServer } from 'http'
 import { WebSocketServer, WebSocket } from 'ws'
 import { createX402Gate, isLocalDashboard, requireScope, SessionTokens } from './auth.js'
 import type { Scope, SessionClaims } from './auth.js'
-import { loadConfig } from './config.js'
+import { loadConfig, normalizeWallet } from './config.js'
 import { AgentService } from './services/agentService.js'
 import type { TradeSignal } from './services/agentService.js'
 import { CopyPipeline } from './services/copyPipeline.js'
@@ -13,6 +13,7 @@ import { createClobOrderPlacer, ExecutionService } from './services/executionSer
 import type { PlaceOrder } from './services/executionService.js'
 import { FirecrawlService } from './services/firecrawlService.js'
 import { PolymarketListener } from './services/polymarketListener.js'
+import { createSolanaPolicy } from './services/solanaPolicy.js'
 
 const config = loadConfig()
 
@@ -35,7 +36,11 @@ const placeOrder = config.execution.live ? await createClobOrderPlacer(config.po
 
 const agentService = new AgentService(config.risk)
 const firecrawl = new FirecrawlService(config.firecrawlUrl)
-const execution = new ExecutionService(config.execution, placeOrder)
+// If a program is configured but unreachable, startup fails rather than running without its limits.
+const solana = config.solana.programId
+  ? await createSolanaPolicy(config.solana, Math.round(config.execution.maxOrderUsdc * 100), Math.round(config.execution.maxDailyUsdc * 100))
+  : null
+const execution = new ExecutionService(config.execution, placeOrder, solana?.authorize)
 const listener = new PolymarketListener(config.polymarketDataUrl, config.targetWhale)
 const tokens = new SessionTokens(config.session.secret, config.session.ttlSeconds, config.session.maxAnalyses)
 const x402 = createX402Gate(config.x402)
@@ -69,6 +74,7 @@ app.get('/api/config', (_req, res) => {
     trackedWallets: [config.targetWhale],
     executionMode: config.execution.live ? 'live' : 'dry_run',
     webContextEnabled: Boolean(process.env.FIRECRAWL_API_KEY),
+    solana: solana?.info ?? null,
     limits: {
       maxOrderUsdc: config.execution.maxOrderUsdc,
       maxDailyUsdc: config.execution.maxDailyUsdc,
@@ -94,7 +100,8 @@ app.post('/api/session/dashboard', (req, res) => {
 if (x402) {
   app.use(x402.middleware)
   app.post('/api/session', (req, res) => {
-    const payer = x402.takePayer(req)?.toLowerCase()
+    const verifiedPayer = x402.takePayer(req)
+    const payer = verifiedPayer ? normalizeWallet(verifiedPayer) : null
     if (!payer) {
       // An error status also means the middleware won't settle the payment.
       res.status(502).json({ error: 'Could not confirm the payer' })
@@ -168,6 +175,7 @@ server.listen(config.port, () => {
   console.log(`Execution mode: ${config.execution.live ? 'LIVE, real orders enabled' : 'dry run, no orders are sent'}`)
   if (!process.env.FIRECRAWL_API_KEY) console.warn('FIRECRAWL_API_KEY is not set, so every trade will fail web validation')
   if (!x402) console.warn('X402_PAY_TO is not set, so paid agent sessions are disabled')
+  console.log(solana ? `Solana policy: ${solana.info.policy} on ${solana.info.cluster}` : 'SOLANA_PROGRAM_ID is not set, so copies are not approved on-chain')
   listener.start()
 })
 

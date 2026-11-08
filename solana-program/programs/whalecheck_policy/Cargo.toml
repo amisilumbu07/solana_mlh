@@ -1,0 +1,20 @@
+[package]
+name = "whalecheck_policy"
+version = "0.1.0"
+description = "On-chain spending limits and one-time approvals for Whalecheck copy trades"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = "1.1.2"

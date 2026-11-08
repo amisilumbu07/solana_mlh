@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import type { AgentStatus, RiskConfig } from '../utils/agentApi'
 import type { SaveState } from '../context/useAgent'
-import { formatPercent, formatUsd } from '../utils/format'
+import { explorerUrl, formatPercent, formatUsd } from '../utils/format'
 
 interface RiskControlsProps {
   config: RiskConfig
@@ -133,6 +133,18 @@ const RiskControls: React.FC<RiskControlsProps> = ({ config, wallets, disabled, 
             <li>
               <span>Spent today</span>
               <span className="money">{live ? formatUsd(limits.spentTodayUsdc) : `${formatUsd(0)} (dry run)`}</span>
+            </li>
+            <li>
+              <span>Enforced on Solana</span>
+              <span>
+                {status?.solana ? (
+                  <a className="solana-link" href={explorerUrl('address', status.solana.policy, status.solana.cluster)} target="_blank" rel="noopener noreferrer">
+                    View policy
+                  </a>
+                ) : (
+                  'Not set up'
+                )}
+              </span>
             </li>
           </ul>
         </div>

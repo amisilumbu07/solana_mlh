@@ -4,6 +4,9 @@ export const formatUsd = (value: number) => usd.format(value)
 
 export const formatSol = (value: number) => `${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SOL`
 
+export const explorerUrl = (kind: 'tx' | 'address', id: string, cluster = 'devnet') =>
+  `https://explorer.solana.com/${kind}/${id}?cluster=${cluster === 'localnet' ? 'custom' : cluster}`
+
 export const formatPercent = (fraction: number) => `${(fraction * 100).toFixed(0)}%`
 
 export const formatDateTime = (timestamp: string) =>

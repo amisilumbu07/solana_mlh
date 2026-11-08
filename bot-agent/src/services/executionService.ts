@@ -22,6 +22,20 @@ export interface ExecutionResult {
   amountUsdc?: number
   maxPrice?: number
   orderId?: string
+  /** Solana transaction that approved this copy. */
+  solanaTx?: string
+}
+
+export type AuthorizeCopy = (tradeKey: string, amountCents: number) => Promise<{ signature: string }>
+
+/** The on-chain program refused the copy, as opposed to Solana being unreachable. */
+export class PolicyRejection extends Error {
+  constructor(
+    message: string,
+    readonly duplicate: boolean,
+  ) {
+    super(message)
+  }
 }
 
 interface State {
@@ -41,6 +55,7 @@ export class ExecutionService {
   constructor(
     private config: ExecutionConfig,
     private placeOrder: PlaceOrder,
+    private authorize?: AuthorizeCopy,
   ) {
     this.state = this.load()
   }
@@ -62,13 +77,26 @@ export class ExecutionService {
       return { status: 'skipped', detail: `Copy size $${amountUsdc} is below the $${this.config.minOrderUsdc} minimum` }
     }
 
-    if (!this.config.live) {
-      return { status: 'dry_run', detail: 'Dry run, no order sent', amountUsdc, maxPrice: request.maxPrice }
+    if (this.config.live) {
+      this.rollDay()
+      if (this.state.spentUsdc + amountUsdc > this.config.maxDailyUsdc) {
+        return { status: 'skipped', detail: `Daily limit of $${this.config.maxDailyUsdc} reached`, amountUsdc }
+      }
     }
 
-    this.rollDay()
-    if (this.state.spentUsdc + amountUsdc > this.config.maxDailyUsdc) {
-      return { status: 'skipped', detail: `Daily limit of $${this.config.maxDailyUsdc} reached`, amountUsdc }
+    // Fails closed: without on-chain approval, nothing goes further.
+    let solanaTx: string | undefined
+    if (this.authorize) {
+      try {
+        solanaTx = (await this.authorize(request.key, Math.round(amountUsdc * 100))).signature
+      } catch (error) {
+        if (error instanceof PolicyRejection && error.duplicate) return { status: 'duplicate', detail: error.message }
+        return { status: 'skipped', detail: (error as Error).message, amountUsdc }
+      }
+    }
+
+    if (!this.config.live) {
+      return { status: 'dry_run', detail: 'Dry run, no order sent', amountUsdc, maxPrice: request.maxPrice, solanaTx }
     }
 
     // Saved before sending. A crash or timeout mid-order could mean it filled, so it stays counted.
@@ -78,9 +106,9 @@ export class ExecutionService {
 
     try {
       const order = await this.placeOrder({ tokenId: request.tokenId, amountUsdc, maxPrice: request.maxPrice })
-      return { status: 'placed', detail: order.status ?? 'Order accepted', amountUsdc, maxPrice: request.maxPrice, orderId: order.orderId }
+      return { status: 'placed', detail: order.status ?? 'Order accepted', amountUsdc, maxPrice: request.maxPrice, orderId: order.orderId, solanaTx }
     } catch (error) {
-      return { status: 'failed', detail: (error as Error).message, amountUsdc, maxPrice: request.maxPrice }
+      return { status: 'failed', detail: (error as Error).message, amountUsdc, maxPrice: request.maxPrice, solanaTx }
     }
   }
 

@@ -595,6 +595,11 @@ code {
   font-size: 14px;
 }
 
+.solana-link {
+  color: var(--accent-dark);
+  font-weight: 500;
+}
+
 .signal__foot {
   display: flex;
   flex-wrap: wrap;
