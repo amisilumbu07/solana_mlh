@@ -1,4 +1,4 @@
-# Solana Prediction Market Copy-Trading Bot - Phase 2 ✅ Complete
+# Whalecheck
 
 An AI-powered DeFi application that monitors whale wallets on Polymarket, analyzes trades using Claude AI, and generates copy-trading signals with real-time dashboard monitoring.
 

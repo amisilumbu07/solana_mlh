@@ -1,6 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { CheckIllustration, SmallCopyIllustration, WhaleIllustration } from '../components/Whale'
 import { formatUsd } from '../utils/format'
+
+const Arrow: React.FC = () => (
+  <svg className="name-arrow" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M4 12H20M14 6L20 12L14 18" fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
 
 const Rows: React.FC<{ rows: [string, string][]; total?: [string, string] }> = ({ rows, total }) => (
   <ul className="rows">
@@ -160,6 +167,39 @@ const Home: React.FC = () => (
           </div>
         </div>
       </div>
+    </section>
+
+    <section className="home-section" aria-labelledby="name-title">
+      <h2 className="home-section__title" id="name-title">
+        Why <span className="name-whale">Whale</span>check?
+      </h2>
+      <p className="home-section__lead">A whale is a trader who moves big money. Whalecheck checks their move before you follow it.</p>
+
+      <div className="name-graphic">
+        <div className="name-step">
+          <WhaleIllustration />
+          <h3>The whale</h3>
+          <p className="name-step__value">{formatUsd(500)}</p>
+          <p className="name-step__text">A big trader makes a buy on Polymarket.</p>
+        </div>
+        <Arrow />
+        <div className="name-step name-step--check">
+          <CheckIllustration />
+          <h3>The check</h3>
+          <p className="name-step__value">6 rules</p>
+          <p className="name-step__text">News, timing and price all have to agree.</p>
+        </div>
+        <Arrow />
+        <div className="name-step">
+          <SmallCopyIllustration />
+          <h3>Your copy</h3>
+          <p className="name-step__value">{formatUsd(5)}</p>
+          <p className="name-step__text">You follow with a small amount, inside your limits.</p>
+        </div>
+      </div>
+      <p className="name-outcome">
+        <strong>If any rule fails, nothing is copied,</strong> and the dashboard tells you why.
+      </p>
     </section>
 
     <section className="home-section" id="story">

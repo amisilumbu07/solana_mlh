@@ -1186,6 +1186,87 @@ input:disabled {
   margin-top: 26px;
 }
 
+.brand__whale {
+  width: 34px;
+  height: 22px;
+}
+
+.name-whale {
+  color: var(--accent);
+}
+
+.name-graphic {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.name-step {
+  height: 100%;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.name-step--check {
+  border-color: #c6d7f5;
+  background: var(--tint);
+}
+
+.name-step__art {
+  display: block;
+  width: 100%;
+  height: 120px;
+  margin-bottom: 12px;
+}
+
+.name-step h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.name-step__value {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.name-step__text {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.name-arrow {
+  width: 28px;
+  height: 28px;
+}
+
+.name-outcome {
+  margin-top: 14px;
+  color: var(--muted);
+}
+
+.name-outcome strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .name-graphic {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .name-arrow {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+}
+
 .example-label {
   margin-bottom: 10px;
   color: var(--accent-dark);

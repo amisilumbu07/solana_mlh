@@ -1,5 +1,5 @@
 {
-  "name": "prediction-market-bot-agent",
+  "name": "whalecheck-agent",
   "version": "1.0.0",
   "description": "LLM-powered agent middleware for copy-trading bot with sentiment analysis",
   "main": "src/index.ts",

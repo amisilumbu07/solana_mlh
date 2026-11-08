@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { BrandWhale } from './Whale'
 import { useAgentStatus } from '../context/useAgentStatus'
 
 const LINKS = [
@@ -24,11 +25,8 @@ const Navbar: React.FC = () => (
     <div className="nav__inner">
       <div className="nav__left">
         <Link to="/" className="brand">
-          <span className="brand__mark" aria-hidden="true">
-            <span />
-            <span />
-          </span>
-          Prediction Market
+          <BrandWhale />
+          Whalecheck
         </Link>
         <ModeBadge />
       </div>
