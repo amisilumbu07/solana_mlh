@@ -13,7 +13,7 @@ import { createClobOrderPlacer, ExecutionService } from './services/executionSer
 import type { PlaceOrder } from './services/executionService.js'
 import { FirecrawlService } from './services/firecrawlService.js'
 import { PolymarketListener } from './services/polymarketListener.js'
-import { createSolanaPolicy } from './services/solanaPolicy.js'
+import { connectSolanaPolicy, createSolanaPolicy } from './services/solanaPolicy.js'
 
 const config = loadConfig()
 
@@ -36,9 +36,10 @@ const placeOrder = config.execution.live ? await createClobOrderPlacer(config.po
 
 const agentService = new AgentService(config.risk)
 const firecrawl = new FirecrawlService(config.firecrawlUrl)
-// If a program is configured but unreachable, startup fails rather than running without its limits.
 const solana = config.solana.programId
-  ? await createSolanaPolicy(config.solana, Math.round(config.execution.maxOrderUsdc * 100), Math.round(config.execution.maxDailyUsdc * 100))
+  ? connectSolanaPolicy(() =>
+      createSolanaPolicy(config.solana, Math.round(config.execution.maxOrderUsdc * 100), Math.round(config.execution.maxDailyUsdc * 100)),
+    )
   : null
 const execution = new ExecutionService(config.execution, placeOrder, solana?.authorize)
 const listener = new PolymarketListener(config.polymarketDataUrl, config.targetWhale)
@@ -74,7 +75,7 @@ app.get('/api/config', (_req, res) => {
     trackedWallets: [config.targetWhale],
     executionMode: config.execution.live ? 'live' : 'dry_run',
     webContextEnabled: Boolean(process.env.FIRECRAWL_API_KEY),
-    solana: solana?.info ?? null,
+    solana: solana?.info() ?? null,
     limits: {
       maxOrderUsdc: config.execution.maxOrderUsdc,
       maxDailyUsdc: config.execution.maxDailyUsdc,
@@ -175,7 +176,7 @@ server.listen(config.port, () => {
   console.log(`Execution mode: ${config.execution.live ? 'LIVE, real orders enabled' : 'dry run, no orders are sent'}`)
   if (!process.env.FIRECRAWL_API_KEY) console.warn('FIRECRAWL_API_KEY is not set, so every trade will fail web validation')
   if (!x402) console.warn('X402_PAY_TO is not set, so paid agent sessions are disabled')
-  console.log(solana ? `Solana policy: ${solana.info.policy} on ${solana.info.cluster}` : 'SOLANA_PROGRAM_ID is not set, so copies are not approved on-chain')
+  if (!solana) console.warn('SOLANA_PROGRAM_ID is not set, so copies are not approved on-chain')
   listener.start()
 })
 

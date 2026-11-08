@@ -34,7 +34,9 @@ The [`whalecheck_policy`](solana-program/programs/whalecheck_policy/src/lib.rs) 
 - It refuses any copy over the per-order or daily limit, so the agent can't overspend even if its own code is wrong.
 - It creates one record per whale trade, so the same trade can never be approved twice.
 - It keeps a public record of every approved copy, and the dashboard links to each transaction.
-- If the program refuses or Solana can't be reached, no order is sent.
+- If the program refuses or Solana can't be reached, the copy stops there and no order is sent.
+
+Program ID on devnet: [`H6ncQXeoD3y42XYuB3NGZjsF4cg9v54m6xxRrEt6GcyQ`](https://explorer.solana.com/address/H6ncQXeoD3y42XYuB3NGZjsF4cg9v54m6xxRrEt6GcyQ?cluster=devnet)
 
 The program holds no funds. x402 session payments also default to Solana. The trades themselves happen on Polymarket, which settles on Polygon.
 
@@ -77,9 +79,9 @@ Then start the agent and dashboard:
 
 Open http://localhost:3000. The agent's API runs on port 3001.
 
-### Deploy the Solana program
+### Deploy your own copy of the Solana program
 
-The agent works without this step, but copies aren't approved on-chain until it's done. Deploying to devnet needs about 2 devnet SOL.
+The agent works without this step, but copies aren't approved on-chain until `SOLANA_PROGRAM_ID` points to a program your wallet controls. Deploying to devnet needs about 2 devnet SOL.
 
 ```bash
 solana-keygen new
@@ -110,7 +112,7 @@ The other settings, including limits, x402 and live trading, are explained in [`
 | Whale trade detection from Polymarket's public API | Built |
 | News checks, AI scoring and the six rules | Built, tested against simulated services |
 | Dry-run decisions and spending limits | Built, tested |
-| Solana policy program (Rust and Anchor) | Built, tested on a local validator. Not yet deployed to devnet. |
+| Solana policy program (Rust and Anchor) | [Deployed on devnet](https://explorer.solana.com/address/H6ncQXeoD3y42XYuB3NGZjsF4cg9v54m6xxRrEt6GcyQ?cluster=devnet), with a real test approval recorded |
 | x402 sessions and access control | Built, tested against a simulated payment service |
 | Live orders | Built, and signing tested against a local stand-in. **Not yet used with real funds.** |
 | Markets and History pages | Sample data, labelled as such in the app |
